@@ -1,7 +1,6 @@
-package example.myPackage.controllers;
+package example.myPackage;
 
 import example.annotations.Component;
-import example.myPackage.IComponentLogger;
 
 @Component
 public class ComponentLogger implements IComponentLogger {

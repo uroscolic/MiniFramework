@@ -5,10 +5,12 @@ import example.annotations.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
 public class DiEngine {
+
     private final Map<Class<?>, Object> singletons = new HashMap<>();
     private final DependencyContainer dependencyContainer = DependencyContainer.getInstance();
     private static DiEngine instance;
@@ -36,7 +38,7 @@ public class DiEngine {
                 if (!field.isAnnotationPresent(Autowired.class)) continue;
 
                 field.setAccessible(true);
-                Class<?> fieldType = getInjectableIfQualifier(field.getType());
+                Class<?> fieldType = getInjectableIfQualifier(field);
                 Object dependencyInstance;
 
                 if (isSingleton(fieldType)) {
@@ -63,12 +65,18 @@ public class DiEngine {
     }
 
 
-    private Class<?> getInjectableIfQualifier(Class<?> type) {
-        Class<?> implType = type;
-        if (isQualifier(type))
-            implType = getInjectableIfQualifier(this.dependencyContainer.getInjection(type));
+    private Class<?> getInjectableIfQualifier(Field field) {
+        if (!field.isAnnotationPresent(Qualifier.class))
+            return field.getType();
 
-        return implType;
+        Qualifier qualifier = field.getAnnotation(Qualifier.class);
+
+        Class<?> type = field.getType();
+        if (!type.isAssignableFrom(qualifier.value()))
+            throw new RuntimeException("Invalid implementation for qualifier with type " + type);
+
+
+        return dependencyContainer.getInjection(field, qualifier.value());
     }
 
     private Object getSingleton(Class<?> type) {
@@ -87,10 +95,6 @@ public class DiEngine {
                 clazz.isAnnotationPresent(Bean.class) && clazz.getAnnotation(Bean.class).scope() == ScopeEnum.PROTOTYPE;
     }
 
-    private boolean isQualifier(Class<?> clazz) {
-        return clazz.isAnnotationPresent(Qualifier.class);
-    }
-
     private void log(Field field, Object instance) {
 
         StringBuilder stringBuilder = new StringBuilder();
@@ -98,7 +102,7 @@ public class DiEngine {
         String fieldName = field.getName();
         String parentClassName = field.getDeclaringClass().getSimpleName();
         int hashCode = instance.hashCode();
-        LocalDateTime now = LocalDateTime.now();
+        String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
         stringBuilder.append("Initialized ")
                 .append(objectType).append(" ")

@@ -1,9 +1,6 @@
 package example.myPackage;
 
 
-import example.ScopeEnum;
-import example.annotations.Bean;
-import example.annotations.Component;
 import example.annotations.Service;
 
 @Service

@@ -24,11 +24,8 @@ public class DependencyContainer {
         String key = type.getName() + ":" + qualifier.getName();
         if (!container.containsKey(key))
             container.put(key, qualifier.asSubclass(type));
-
         Class<?> injection = container.get(key);
 
-        if (injection == null)
-            throw new RuntimeException("No Dependency Injection for type: " + type);
         return injection.asSubclass(type);
     }
 

@@ -41,21 +41,20 @@ public class DiEngine {
                 Class<?> fieldType = getInjectableIfQualifier(field);
                 Object dependencyInstance;
 
-                if (isSingleton(fieldType)) {
+                if (isSingleton(fieldType))
                     dependencyInstance = getSingleton(fieldType);
-                }
-                else if (isComponent(fieldType)) {
+                else if (isComponent(fieldType))
                     dependencyInstance = inject(fieldType);
-                }
                 else {
+                    field.setAccessible(false);
                     throw new InstantiationException("No Dependency Injection for type: " + fieldType);
                 }
 
                 field.set(instance, dependencyInstance);
 
-                if (field.getAnnotation(Autowired.class).verbose()) {
+                if (field.getAnnotation(Autowired.class).verbose())
                     log(field, dependencyInstance);
-                }
+                field.setAccessible(false);
             }
             return instance;
         } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException ex) {

@@ -43,7 +43,7 @@ public class DiEngine {
 
                 if (isSingleton(fieldType))
                     dependencyInstance = getSingleton(fieldType);
-                else if (isComponent(fieldType))
+                else if (isPrototype(fieldType))
                     dependencyInstance = inject(fieldType);
                 else {
                     field.setAccessible(false);
@@ -89,7 +89,7 @@ public class DiEngine {
                 clazz.isAnnotationPresent(Bean.class) && clazz.getAnnotation(Bean.class).scope() == ScopeEnum.SINGLETON;
     }
 
-    private boolean isComponent(Class<?> clazz) {
+    private boolean isPrototype(Class<?> clazz) {
         return clazz.isAnnotationPresent(Component.class) ||
                 clazz.isAnnotationPresent(Bean.class) && clazz.getAnnotation(Bean.class).scope() == ScopeEnum.PROTOTYPE;
     }
